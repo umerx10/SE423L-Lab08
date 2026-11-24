@@ -1,28 +1,33 @@
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class HospitalSystem {
 
-    private static final Map<Integer, String> patientRecords = new HashMap<>();
+    private static final Map<Integer, String> patientRecords =
+            new ConcurrentHashMap<>();
 
     public static void addPatient(int id, String status) {
-        patientRecords.put(id, status);
+        patientRecords.putIfAbsent(id, status);
     }
 
     public static void updatePatient(int id, String status) {
-        patientRecords.put(id, status);
+        patientRecords.computeIfPresent(id,
+                (key, oldStatus) -> status);
     }
 
     public static void viewPatient(int id) {
+        String status = patientRecords.get(id);
+
         System.out.println(
-            Thread.currentThread().getName()
-            + " - Patient " + id
-            + ": " + patientRecords.get(id)
+                Thread.currentThread().getName()
+                + " - Patient " + id
+                + ": " + status
         );
     }
 
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args)
+            throws InterruptedException {
 
         addPatient(101, "Admitted");
 
